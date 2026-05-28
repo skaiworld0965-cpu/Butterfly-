@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Our Magical Fairytale ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,600;1,400&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0; -webkit-tap-highlight-color: transparent;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;color:#fff;background-color:#ff7eb3;}
+
+/* ── DYNAMIC LIVING BACKGROUND ── */
+.bg-gradient {
+  position:fixed;inset:0;z-index:-2;
+  background: linear-gradient(-45deg, #ff758c, #ff7eb3, #fecfef, #ff9a9e, #fad0c4);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── CANVAS LAYERS ── */
+canvas { position:fixed; inset:0; pointer-events:none; }
+#ambientCanvas { z-index:-1; } /* Floating dust & petals */
+
+/* ── TOUCH BURST MAGIC ── */
+.touch-particle {
+  position:fixed; pointer-events:none; z-index:9999;
+  font-size:1.5rem; text-shadow:0 0 10px rgba(255,255,255,0.8);
+  animation: explode 0.8s cubic-bezier(0.1, 1, 0.3, 1) forwards;
+}
+@keyframes explode {
+  0% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity:1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot)); opacity:0; }
+}
+
+/* ── PAGE CONTROLLER & CINEMATIC ZOOM ── */
+#page-container { position:relative; width:100%; height:100%; perspective:1200px; }
+.page { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transform:translateZ(-1000px); transition:all 1s cubic-bezier(0.4, 0, 0.2, 1); }
+.page.active { opacity:1; pointer-events:all; transform:translateZ(0); }
+.page.exiting { opacity:0; transform:translateZ(1000px); } /* Zooms past the screen */
+
+/* ── UI BUTTONS ── */
+.music-btn{position:fixed;top:20px;right:20px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.6);color:#fff;font-size:1.5rem;display:flex;align-items:center;justify-content:center;z-index:9900;cursor:pointer;backdrop-filter:blur(8px);box-shadow:0 0 20px rgba(255,255,255,0.3);}
+.nav-btn{margin-top:40px; background:rgba(255,255,255,0.25); border:2px solid #fff; color:#fff; padding:15px 40px; border-radius:50px; font-family:'Dancing Script',cursive; font-size:1.8rem; cursor:pointer; backdrop-filter:blur(10px); box-shadow:0 10px 30px rgba(255,117,140,0.5), inset 0 0 15px rgba(255,255,255,0.5); transition:transform 0.3s, box-shadow 0.3s; animation:pulseBtn 2s infinite alternate;}
+.nav-btn:active{transform:scale(0.95);}
+@keyframes pulseBtn{0%{box-shadow:0 10px 30px rgba(255,117,140,0.5), inset 0 0 15px rgba(255,255,255,0.5);} 100%{box-shadow:0 10px 50px rgba(255,255,255,0.8), inset 0 0 25px rgba(255,255,255,0.8);}}
+
+/* ── PAGE 1: THE PORTAL ── */
+.portal-heart { font-size:6rem; filter:drop-shadow(0 0 30px #fff); animation:heartbeat 1.2s infinite; cursor:pointer; }
+.portal-title { font-family:'Dancing Script',cursive; font-size:4rem; text-shadow:0 0 20px rgba(255,255,255,0.8); margin-top:20px; text-align:center; padding:0 15px; line-height:1.2;}
+@keyframes heartbeat { 0%,100%{transform:scale(1);} 25%{transform:scale(1.15);} 50%{transform:scale(1);} 75%{transform:scale(1.15);} }
+
+/* ── PAGE 2: 3D CAROUSEL ── */
+.carousel-title { font-family:'Dancing Script',cursive; font-size:3rem; margin-bottom:10px; text-shadow:0 0 15px rgba(255,255,255,0.8); text-align:center; position:absolute; top:10%; width:100%; pointer-events:none; z-index:10;}
+.carousel-hint { position:absolute; top:calc(10% + 60px); width:100%; text-align:center; font-size:1.1rem; font-style:italic; opacity:0.8; pointer-events:none; animation:floatY 2s infinite alternate; z-index:10;}
+@keyframes floatY { 0%{transform:translateY(0);} 100%{transform:translateY(-10px);} }
+
+.scene { width:200px; height:280px; perspective:1000px; position:relative; margin-top:20px; z-index:5;}
+@media(max-width:400px){ .scene{width:160px; height:220px;} }
+.carousel { width:100%; height:100%; position:absolute; transform-style:preserve-3d; transition:transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.carousel__cell { position:absolute; width:100%; height:100%; left:0; top:0; border:4px solid #fff; border-radius:15px; overflow:hidden; box-shadow:0 15px 40px rgba(255,117,140,0.6); background:#fff; backface-visibility:visible; pointer-events:none; }
+.carousel__cell img { width:100%; height:100%; object-fit:cover; display:block; }
+/* Glassmorphism reflection on images */
+.carousel__cell::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%); z-index:2; }
+
+/* ── PAGE 3: LOVE LETTER ── */
+.glass-panel { background:rgba(255,255,255,0.15); backdrop-filter:blur(15px); border:2px solid rgba(255,255,255,0.4); border-radius:20px; padding:40px 30px; width:90%; max-width:500px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.2); }
+.glass-panel h1 { font-family:'Dancing Script',cursive; font-size:3.5rem; margin-bottom:20px; text-shadow:0 0 15px #fff; }
+.glass-panel p { font-size:1.3rem; line-height:1.8; margin-bottom:15px; }
+
+</style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<canvas id="ambientCanvas"></canvas>
+
+<audio id="bgm" loop preload="auto">
+  <source src="https://files.catbox.moe/ol3k2r.mp3" type="audio/mpeg">
+</audio>
+<button class="music-btn" id="mbtn">🎵</button>
+
+<div id="page-container">
+  
+  <!-- PAGE 1: PORTAL -->
+  <div class="page active" id="p1">
+    <div class="portal-heart" onclick="tryPlay(); goToPage(2)">💖</div>
+    <div class="portal-title">Tap to enter my heart...</div>
+  </div>
+
+  <!-- PAGE 2: 3D CAROUSEL -->
+  <div class="page" id="p2">
+    <div class="carousel-title">Our Magic</div>
+    <div class="carousel-hint">Swipe left & right to spin</div>
+    
+    <div class="scene">
+      <div class="carousel" id="carousel">
+        <!-- Cells injected via JS -->
+      </div>
+    </div>
+    
+    <button class="nav-btn" style="position:absolute; bottom:10%;" onclick="goToPage(3)">A Final Promise ✨</button>
+  </div>
+
+  <!-- PAGE 3: FINAL LETTER -->
+  <div class="page" id="p3">
+    <div class="glass-panel">
+      <h1>I Love You</h1>
+      <p>Every spin of the world, every beat of my heart, every star in the sky... they all point to you.</p>
+      <p>You are my fairytale, my reality, and everything in between.</p>
+      <div style="font-size:3rem; margin-top:20px; animation:heartbeat 1s infinite;">💗</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// --- IMAGE DATA (8 images for the carousel looks best) ---
+const allImages = [
+  "https://i.ibb.co/mrcZ9pnN/IMG-9470.jpg", "https://i.ibb.co/nM2VTL6j/IMG-9471.jpg", 
+  "https://i.ibb.co/SXjJ3dbz/1275c2ac-3cf4-4c6c-977b-8b6c2c88dc01.jpg", "https://i.ibb.co/dsQ4vWGK/IMG-9464.jpg",
+  "https://i.ibb.co/0RXd50LZ/IMG-9463.jpg", "https://i.ibb.co/ZPXbCfM/IMG-9462.jpg",
+  "https://i.ibb.co/bM4ZV8kW/IMG-9461.jpg", "https://i.ibb.co/B2LQMSGg/IMG-9458.jpg",
+  "https://i.ibb.co/fYhyJpnc/IMG-9459.jpg", "https://i.ibb.co/rf5S7HwG/IMG-9457.jpg",
+  "https://i.ibb.co/QF6j6PHG/IMG-9278.jpg", "https://i.ibb.co/Pz3B5Lfd/IMG-9275.jpg",
+  "https://i.ibb.co/KzXMSgSf/IMG-9276.jpg", "https://i.ibb.co/mr6LhmcK/IMG-9277.jpg"
+];
+function shuffle(a){ return [...a].sort(()=>Math.random()-0.5); }
+const carouselImages = shuffle(allImages).slice(0, 8); // Grab 8 random pics
+
+// --- MUSIC ---
+let musicOn = false;
+const bgm = document.getElementById('bgm');
+const mbtn = document.getElementById('mbtn');
+function tryPlay(){
+  if(!musicOn){ bgm.play().then(()=>{ musicOn=true; mbtn.textContent='🎵'; }).catch(()=>{}); }
+}
+mbtn.addEventListener('click', (e)=>{
+  e.stopPropagation(); // Prevents touch burst on button
+  if(musicOn){ bgm.pause(); musicOn=false; mbtn.textContent='🔇'; }
+  else { bgm.play(); musicOn=true; mbtn.textContent='🎵'; }
+});
+
+// --- NAVIGATION (CINEMATIC ZOOM) ---
+let curPage = 1;
+function goToPage(n){
+  const current = document.getElementById('p'+curPage);
+  const next = document.getElementById('p'+n);
+  
+  // Current page zooms past the camera
+  current.classList.remove('active');
+  current.classList.add('exiting');
+  
+  // Next page comes in from the distance
+  next.classList.remove('exiting');
+  next.classList.add('active');
+  
+  curPage = n;
+  if(n === 2) setTimeout(initCarousel, 500); // Give it time to render before math
+}
+
+// --- TOUCH BURST MAGIC ---
+const particlesArray = ['💖', '✨', '🦋', '🌸', '💫'];
+document.addEventListener('pointerdown', (e) => {
+  if(e.target.closest('button')) return; // Don't explode on UI buttons
+  createBurst(e.clientX, e.clientY);
+});
+document.addEventListener('touchmove', (e) => {
+  // Sprinkle dust while dragging
+  if(Math.random() > 0.7) createBurst(e.touches[0].clientX, e.touches[0].clientY, 1);
+});
+
+function createBurst(x, y, count=8) {
+  for(let i=0; i<count; i++){
+    const p = document.createElement('div');
+    p.className = 'touch-particle';
+    p.innerText = particlesArray[Math.floor(Math.random()*particlesArray.length)];
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    
+    // Random math for explosion trajectory
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = 50 + Math.random() * 150;
+    const tx = Math.cos(angle) * velocity + 'px';
+    const ty = Math.sin(angle) * velocity + 'px';
+    const rot = (Math.random()-0.5) * 360 + 'deg';
+    
+    p.style.setProperty('--tx', tx);
+    p.style.setProperty('--ty', ty);
+    p.style.setProperty('--rot', rot);
+    
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 800);
+  }
+}
+
+// --- 3D CAROUSEL LOGIC ---
+const carousel = document.getElementById('carousel');
+const cellCount = carouselImages.length; // 8
+let selectedIndex = 0;
+let cellWidth = 200;
+let radius, theta;
+
+function initCarousel() {
+  if(carousel.children.length > 0) return; // Already built
+  
+  const sceneWidth = document.querySelector('.scene').offsetWidth;
+  cellWidth = sceneWidth;
+  theta = 360 / cellCount;
+  // Calculate exact Z translation needed to form a circle
+  radius = Math.round((cellWidth / 2) / Math.tan(Math.PI / cellCount)); 
+  
+  // Push it slightly further back so it doesn't clip the screen
+  const zOffset = radius + 30; 
+  
+  for(let i=0; i<cellCount; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'carousel__cell';
+    cell.innerHTML = `<img src="${carouselImages[i]}">`;
+    const cellAngle = theta * i;
+    cell.style.transform = `rotateY(${cellAngle}deg) translateZ(${zOffset}px)`;
+    carousel.appendChild(cell);
+  }
+  rotateCarousel();
+}
+
+function rotateCarousel() {
+  const angle = theta * selectedIndex * -1;
+  carousel.style.transform = `translateZ(${-radius - 30}px) rotateY(${angle}deg)`;
+}
+
+// Swipe logic for Carousel
+let startX = 0;
+let isDragging = false;
+let startRotation = 0;
+
+document.addEventListener('touchstart', e => {
+  if(curPage !== 2) return;
+  startX = e.touches[0].clientX;
+  isDragging = true;
+  carousel.style.transition = 'none'; // Snap to finger
+});
+
+document.addEventListener('touchmove', e => {
+  if(!isDragging || curPage !== 2) return;
+  const currentX = e.touches[0].clientX;
+  const diffX = currentX - startX;
+  const angle = (theta * selectedIndex * -1) + (diffX / 3);
+  carousel.style.transform = `translateZ(${-radius - 30}px) rotateY(${angle}deg)`;
+});
+
+document.addEventListener('touchend', e => {
+  if(!isDragging || curPage !== 2) return;
+  isDragging = false;
+  const endX = e.changedTouches[0].clientX;
+  const diffX = endX - startX;
+  
+  // Snap to next/prev image if dragged far enough
+  carousel.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+  if(diffX < -40) selectedIndex++;
+  else if(diffX > 40) selectedIndex--;
+  
+  rotateCarousel();
+});
+
+// --- AMBIENT CANVAS (Dust & Petals) ---
+const canvas = document.getElementById('ambientCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize);
+resize();
+
+function initParticles(){
+  for(let i=0; i<50; i++){
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 3 + 1,
+      vy: (Math.random() - 1) * 1.5, // Float upwards
+      vx: (Math.random() - 0.5) * 1,
+      a: Math.random(),
+      type: Math.random() > 0.8 ? 'petal' : 'dust'
+    });
+  }
+}
+initParticles();
+
+function drawAmbient(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p => {
+    p.y += p.vy;
+    p.x += Math.sin(p.y/30) + p.vx;
+    
+    // Wrap around screen
+    if(p.y < -10) p.y = canvas.height + 10;
+    if(p.y > canvas.height + 10) p.y = -10;
+    if(p.x < -10) p.x = canvas.width + 10;
+    if(p.x > canvas.width + 10) p.x = -10;
+
+    if(p.type === 'dust'){
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(p.a += 0.02)) * 0.5})`;
+      ctx.fill();
+    } else {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.y * 0.02);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.r*2, p.r*4, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+  });
+  requestAnimationFrame(drawAmbient);
+}
+drawAmbient();
+
+</script>
+</body>
+</html>
